@@ -72,8 +72,6 @@ def receive_client_file():
 
         if file:
             filename = file.filename
-            with open('test.txt', 'w') as f:
-                f.write(filename)
             name = Path(filename).stem
             ext = Path(filename).suffix
             task_id = str(time.time_ns())

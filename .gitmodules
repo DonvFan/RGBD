@@ -1,0 +1,3 @@
+[submodule "preprocess/mask2former"]
+	path = preprocess/mask2former
+	url = https://github.com/nihalsid/Mask2Former.git
