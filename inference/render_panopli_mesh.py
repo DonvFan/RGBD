@@ -32,7 +32,7 @@ def render_panopli_checkpoint(run_path):
 
     import sys
 
-    sys.path.append(str(run_path / 'code'))
+    sys.path.append(str(run_path / 'code' / 'pf'))
 
     from dataset import PanopLiDataset, create_segmentation_data_panopli
     from model.radiance_field.tensoRF import TensorVMSplit

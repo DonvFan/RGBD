@@ -59,7 +59,7 @@ def data_ingp2pl(src_folder, json_name = 'transforms.json', flip = True):
 
 
 def data_zip2ns(data_path):
-    out_dir = 'data_path'
+    out_dir = data_path
     data_zip_path = os.path.join(out_dir, 'source.zip')
     cmd = 'ns-process-data polycam --data {0} --output-dir {1} --use-depth --max-dataset-size -1 --min-blur-score -1  --num-downscales 0'.format(data_zip_path, out_dir)
     os.system(cmd)
@@ -91,26 +91,16 @@ def unzip_polycam_src(zip_data_path, output_dir = None)-> str:
 
 from preprocess.pl.preprocess_m3d import *
 def label_m2f_pl(dest:str, sc_classes = 'super'):
-    # copy distorted images from raw to root
-    # copy_color(dest, fraction=1)
-    # copy transforms json
-    # rename_and_copy_transforms(dest)
-    # create segmentation data stub
+
+    dest = Path(dest)
     create_segmentation_data(dest, sc_classes=sc_classes)
-    # # undistort images
-    # create_undistorted_images(dest)
-    # create_poses_without_undistortion(dest)
-    # # create validation set (15% to 25%)
-    # # create_validation_set(dest, 0.15)
-    # # make sure to run mask2former before this step
-    # # run mask2former segmentation data mapping
     map_panoptic_coco(dest, sc_classes=sc_classes)
-    # # # visualize xlabels
+
     visualize_mask_folder(dest / "m2f_semantics")
     visualize_mask_folder(dest / "m2f_instance")
     visualize_mask_folder(dest / "m2f_notta_semantics")
     visualize_mask_folder(dest / "m2f_notta_instance")
-    # copy predicted labels as GT, since we don't have GT
+
     shutil.copytree(dest / "m2f_semantics", dest / "semantics")
     shutil.copytree(dest / "m2f_instance", dest / "instance")
     shutil.copytree(dest / "m2f_semantics", dest / "rs_semantics")
@@ -141,7 +131,7 @@ import trimesh
 import time
 
 
-def train_get_tsdf_grid(data_root, depth_scale = 1000., max_depth = 5., tsdf_dim = 512):
+def get_tsdf_grid(data_root, depth_scale = 1000., max_depth = 5., tsdf_dim = 512):
     ins_mat = torch.from_numpy(np.loadtxt(Path(data_root) / 'intrinsic' / 'intrinsic_color.txt', ndmin=2)).float()
     pose_dir = Path(data_root) / 'pose'
     depth_dir = Path(data_root) / 'depth'

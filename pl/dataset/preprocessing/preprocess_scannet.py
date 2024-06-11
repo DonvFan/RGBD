@@ -283,7 +283,7 @@ def fold_scannet_classes(src_folder):
 
 def get_thing_semantics(sc_classes='reduced'):
     thing_semantics = [False]
-    for cllist in [x.strip().split(',') for x in Path(f"resources/scannet_{sc_classes}_things.csv").read_text().strip().splitlines()]:
+    for cllist in [x.strip().split(',') for x in Path(f"./preprocess/pl/resources/scannet_{sc_classes}_things.csv").read_text().strip().splitlines()]:
         thing_semantics.append(bool(int(cllist[1])))
     return thing_semantics
 
@@ -428,7 +428,7 @@ def convert_from_mask_to_semantics_and_instances_no_remap(original_mask, segment
 def map_panoptic_coco(src_folder, sc_classes='reduced', undistort=False):
     coco_to_scannet = {}
     thing_semantics = get_thing_semantics(sc_classes)
-    for cidx, cllist in enumerate([x.strip().split(',') for x in Path(f"resources/scannet_{sc_classes}_to_coco.csv").read_text().strip().splitlines()]):
+    for cidx, cllist in enumerate([x.strip().split(',') for x in Path(f"./preprocess/pl/resources/scannet_{sc_classes}_to_coco.csv").read_text().strip().splitlines()]):
         for c in cllist[1:]:
             coco_to_scannet[c.split('/')[1]] = cidx + 1
     instance_ctr = 1
@@ -473,37 +473,36 @@ def map_panoptic_coco(src_folder, sc_classes='reduced', undistort=False):
             probability, confidence, confidence_notta = torch.clip(torch.from_numpy(probability_undistorted), 0, 1), torch.clip(torch.from_numpy(confidence_undistorted), 0, 1), torch.clip(torch.from_numpy(confidence_notta_undistorted), 0, 1)
 
         semantic, instance, invalid_mask, instance_ctr, instance_to_semantic = convert_from_mask_to_semantics_and_instances_no_remap(data['mask'], data['segments'], coco_to_scannet, thing_semantics, instance_ctr, instance_to_semantic)
-        semantic_notta, instance_notta, _, instance_ctr_notta, instance_to_semantic_notta = convert_from_mask_to_semantics_and_instances_no_remap(data['mask_notta'], data['segments_notta'], coco_to_scannet, thing_semantics,
-                                                                                                                                                  instance_ctr_notta, instance_to_semantic_notta)
-        # segment_mask = torch.zeros_like(data['mask'])
-        # for s in data['segments']:
-        #     segment_mask[data['mask'] == s['id']] = segment_ctr
-        #     segment_ctr += 1
-        # Image.fromarray(segment_mask.numpy().astype(np.uint16)).save(src_folder / "m2f_segments" / f"{fpath.stem}.png")
-        # Image.fromarray(semantic.numpy().astype(np.uint16)).save(src_folder / "m2f_semantics" / f"{fpath.stem}.png")
-        # Image.fromarray(instance.numpy()).save(src_folder / "m2f_instance" / f"{fpath.stem}.png")
-        # Image.fromarray(semantic_notta.numpy().astype(np.uint16)).save(src_folder / "m2f_notta_semantics" / f"{fpath.stem}.png")
-        # Image.fromarray(instance_notta.numpy()).save(src_folder / "m2f_notta_instance" / f"{fpath.stem}.png")
-        # Image.fromarray(invalid_mask.numpy().astype(np.uint8) * 255).save(src_folder / "m2f_invalid" / f"{fpath.stem}.png")
-        # # interpolated_p = torch.nn.functional.interpolate(torch.cat([probability.permute((2, 0, 1)), confidence.unsqueeze(0), confidence_notta.unsqueeze(0)], 0).unsqueeze(0), size=(256, 256), mode='bilinear', align_corners=False).squeeze(0)
-        # # probability, confidence, confidence_notta = interpolated_p[:-2, :, :].permute((1, 2, 0)).cpu(), interpolated_p[-2, :, :].cpu(), interpolated_p[-1, :, :].cpu()
-        # np.savez_compressed(src_folder / "m2f_probabilities" / f"{fpath.stem}.npz", probability=probability.float().numpy(), confidence=confidence.float().numpy(), confidence_notta=confidence_notta.float().numpy())
+        semantic_notta, instance_notta, _, instance_ctr_notta, instance_to_semantic_notta = convert_from_mask_to_semantics_and_instances_no_remap(data['mask_notta'], data['segments_notta'], coco_to_scannet, thing_semantics,instance_ctr_notta, instance_to_semantic_notta)
+        segment_mask = torch.zeros_like(data['mask'])
+        for s in data['segments']:
+            segment_mask[data['mask'] == s['id']] = segment_ctr
+            segment_ctr += 1
+        Image.fromarray(segment_mask.numpy().astype(np.uint16)).save(src_folder / "m2f_segments" / f"{fpath.stem}.png")
+        Image.fromarray(semantic.numpy().astype(np.uint16)).save(src_folder / "m2f_semantics" / f"{fpath.stem}.png")
+        Image.fromarray(instance.numpy()).save(src_folder / "m2f_instance" / f"{fpath.stem}.png")
+        Image.fromarray(semantic_notta.numpy().astype(np.uint16)).save(src_folder / "m2f_notta_semantics" / f"{fpath.stem}.png")
+        Image.fromarray(instance_notta.numpy()).save(src_folder / "m2f_notta_instance" / f"{fpath.stem}.png")
+        Image.fromarray(invalid_mask.numpy().astype(np.uint8) * 255).save(src_folder / "m2f_invalid" / f"{fpath.stem}.png")
+        # interpolated_p = torch.nn.functional.interpolate(torch.cat([probability.permute((2, 0, 1)), confidence.unsqueeze(0), confidence_notta.unsqueeze(0)], 0).unsqueeze(0), size=(256, 256), mode='bilinear', align_corners=False).squeeze(0)
+        # probability, confidence, confidence_notta = interpolated_p[:-2, :, :].permute((1, 2, 0)).cpu(), interpolated_p[-2, :, :].cpu(), interpolated_p[-1, :, :].cpu()
+        np.savez_compressed(src_folder / "m2f_probabilities" / f"{fpath.stem}.npz", probability=probability.float().numpy(), confidence=confidence.float().numpy(), confidence_notta=confidence_notta.float().numpy())
         
-        # if undistort:
-        #     to_undistort = [
-        #         src_folder / "m2f_segments" / f"{fpath.stem}.png",
-        #         src_folder / "m2f_semantics" / f"{fpath.stem}.png",
-        #         src_folder / "m2f_instance" / f"{fpath.stem}.png",
-        #         src_folder / "m2f_notta_semantics" / f"{fpath.stem}.png",
-        #         src_folder / "m2f_notta_instance" / f"{fpath.stem}.png",
-        #         src_folder / "m2f_invalid" / f"{fpath.stem}.png"
-        #     ]
-        #     for img_p in to_undistort:
-        #         img = np.array(Image.open(img_p))
-        #         img = cv2.remap(img, mapx, mapy, cv2.INTER_NEAREST)
-        #         img[distorted_mask > 0] = 0
-        #         img = img[roi[1]: roi[3] + 1, roi[0]: roi[2] + 1]
-        #         Image.fromarray(img).save(img_p)
+        if undistort:
+            to_undistort = [
+                src_folder / "m2f_segments" / f"{fpath.stem}.png",
+                src_folder / "m2f_semantics" / f"{fpath.stem}.png",
+                src_folder / "m2f_instance" / f"{fpath.stem}.png",
+                src_folder / "m2f_notta_semantics" / f"{fpath.stem}.png",
+                src_folder / "m2f_notta_instance" / f"{fpath.stem}.png",
+                src_folder / "m2f_invalid" / f"{fpath.stem}.png"
+            ]
+            for img_p in to_undistort:
+                img = np.array(Image.open(img_p))
+                img = cv2.remap(img, mapx, mapy, cv2.INTER_NEAREST)
+                img[distorted_mask > 0] = 0
+                img = img[roi[1]: roi[3] + 1, roi[0]: roi[2] + 1]
+                Image.fromarray(img).save(img_p)
         
         # feats = data['feats']
         # np.savez_compressed(src_folder / "m2f_feats" / f"{fpath.stem}.npz", feats=feats.float().numpy())

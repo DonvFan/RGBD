@@ -207,7 +207,7 @@ def visualize_voxel_grid(output_path, voxel_grid, scale_to=(-1, 1)):
 
 
 def visualize_labeled_points(locations, labels, output_path):
-    from util.distinct_colors import DistinctColors
+    from pl.util.distinct_colors import DistinctColors
     distinct_colors = DistinctColors()
     if isinstance(labels, torch.Tensor):
         colored_arr = distinct_colors.get_color_fast_torch(labels.flatten().cpu().numpy().tolist()).reshape(list(labels.shape) + [3]).numpy()
@@ -224,7 +224,7 @@ def visualize_weighted_points(output_path, xyz, weights, threshold=1e-4):
 
 
 def dvis_colorized(arr):
-    from util.distinct_colors import DistinctColors
+    from pl.util.distinct_colors import DistinctColors
     from dvis import dvis
     distinct_colors = DistinctColors()
     if isinstance(arr, torch.Tensor):
@@ -235,7 +235,7 @@ def dvis_colorized(arr):
 
 
 def visualize_mask(arr, path):
-    from util.distinct_colors import DistinctColors
+    from pl.util.distinct_colors import DistinctColors
     distinct_colors = DistinctColors()
     assert len(arr.shape) == 2, "should be an HxW array"
     boundaries = get_boundary_mask(arr)

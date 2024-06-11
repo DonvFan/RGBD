@@ -185,7 +185,7 @@ def create_segmentation_data(src_folder, sc_classes='reduced'):
         'fg_classes': [i for i, is_thing in enumerate(thing_semantics) if is_thing],
         'bg_classes': [i for i, is_thing in enumerate(thing_semantics) if not is_thing]
     }
-    pickle.dump(export_dict, open(src_folder / 'segmentation_data.pkl', 'wb'))
+    pickle.dump(export_dict, open((src_folder) / 'segmentation_data.pkl', 'wb'))
 
 
 if __name__ == "__main__":

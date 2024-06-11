@@ -118,7 +118,16 @@ def consumer()
 ```
 def main(task_path:str):
 ```
+处理polycam数据的主程序。`task_path`为存储任务数据的路径，即```<data_root>/<id>```。
 
+处理函数及过程如下：
 
+1. `data_zip2ns`: polycam压缩包通过nerfstudio预先处理，提取出颜色图、深度图、相机参数。
+2. `data_ingp2pl`: 将数据组织为PanopticField数据集形式。
+3. `label_m2f`: 通过mask2former提取图像语义信息。
+4. `label_m2f_pl`: 将语义信息预处理，对scannet语义类别进行归并，最终缩减为31类。
+5. `o3d_tsdf_fusion`: open3d TSDF融合，提取深度图数据对应的Mesh模型。
+6. `train_model`: 模型训练。
+7. `inference_model`: 模型推理。
 
 
