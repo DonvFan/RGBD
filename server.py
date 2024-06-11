@@ -112,6 +112,8 @@ if __name__ == '__main__':
     args = parser.parse_args()
     data_root = args.data_root
     runs_root = args.runs_root
+    os.makedirs(runs_root, exist_ok=True)
+    os.makedirs(data_root, exist_ok=True)
     consumer_proc = mp.Process(target=consumer)
     consumer_proc.start()
 
